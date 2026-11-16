@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Espace Partenaires - Upload de Contenus</title>
+    <style>
+      :root {
+        --moov-blue: #0055a5;
+        --moov-blue-dark: #003b73;
+        --moov-orange: #ff6600;
+        --moov-orange-hover: #e65c00;
+        --bg-light: #f4f7fa;
+        --white: #ffffff;
+        --text-dark: #1e293b;
+        --text-muted: #64748b;
+        --border-color: #cbd5e1;
+        --success: #16a34a;
+        --error: #dc2626;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+
+      body {
+        background-color: var(--bg-light);
+        color: var(--text-dark);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* En-tête */
+      header {
+        background: linear-gradient(
+          135deg,
+          var(--moov-blue) 0%,
+          var(--moov-blue-dark) 100%
+        );
+        color: var(--white);
+        padding: 1.2rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 4px solid var(--moov-orange);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .brand-badge {
+        background-color: var(--moov-orange);
+        color: var(--white);
+        font-weight: 800;
+        padding: 6px 12px;
+        border-radius: 6px;
+        letter-spacing: 0.5px;
+        font-size: 1.1rem;
+      }
+
+      .brand h1 {
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+
+      .api-status {
+        font-size: 0.85rem;
+        background: rgba(255, 255, 255, 0.15);
+        padding: 6px 12px;
+        border-radius: 20px;
+      }
+
+      /* Conteneur Principal */
+      main {
+        flex: 1;
+        max-width: 820px;
+        width: 100%;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+
+      .card {
+        background: var(--white);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 10px 25px rgba(0, 85, 165, 0.08);
+        border-top: 5px solid var(--moov-blue);
+      }
+
+      .card-header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .card-header h2 {
+        color: var(--moov-blue);
+        font-size: 1.5rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .card-header p {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+      }
+
+      /* Zone Drag & Drop Fichier */
+      .drop-zone {
+        border: 2px dashed var(--moov-blue);
+        background-color: #f8fafc;
+        border-radius: 10px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        margin-bottom: 1.5rem;
+      }
+
+      .drop-zone:hover,
+      .drop-zone.dragover {
+        border-color: var(--moov-orange);
+        background-color: #fff7ed;
+      }
+
+      .drop-zone-icon {
+        font-size: 2.5rem;
+        color: var(--moov-orange);
+        margin-bottom: 0.5rem;
+      }
+
+      .drop-zone p {
+        font-weight: 600;
+        color: var(--moov-blue);
+      }
+
+      .drop-zone span {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+      }
+
+      .file-info {
+        display: none;
+        margin-top: 1rem;
+        padding: 0.75rem 1rem;
+        background: #eff6ff;
+        border-left: 4px solid var(--moov-blue);
+        border-radius: 4px;
+        text-align: left;
+        font-size: 0.9rem;
+      }
+
+      /* Grille de formulaire */
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .form-group.full-width {
+        grid-column: 1 / -1;
+      }
+
+      label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+        color: var(--text-dark);
+      }
+
+      label .required {
+        color: var(--moov-orange);
+        margin-left: 3px;
+      }
+
+      label .optional {
+        font-weight: 400;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+      }
+
+      input[type="text"],
+      input[type="password"],
+      textarea {
+        padding: 0.75rem 0.9rem;
+        border: 1.5px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+
+      input:focus,
+      textarea:focus {
+        outline: none;
+        border-color: var(--moov-blue);
+        box-shadow: 0 0 0 3px rgba(0, 85, 165, 0.15);
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 90px;
+      }
+
+      /* Section Configuration API / Token */
+      .auth-box {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+      }
+
+      /* Barre de progression */
+      .progress-container {
+        display: none;
+        margin-top: 1.5rem;
+      }
+
+      .progress-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+        color: var(--moov-blue);
+      }
+
+      .progress-bar-bg {
+        width: 100%;
+        height: 12px;
+        background-color: #e2e8f0;
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .progress-bar-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(
+          90deg,
+          var(--moov-blue),
+          var(--moov-orange)
+        );
+        transition: width 0.2s ease;
+      }
+
+      /* Bouton d'envoi */
+      .actions {
+        margin-top: 2rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+      }
+
+      .btn {
+        padding: 0.85rem 1.75rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .btn-secondary {
+        background-color: #e2e8f0;
+        color: var(--text-dark);
+      }
+
+      .btn-secondary:hover {
+        background-color: #cbd5e1;
+      }
+
+      .btn-primary {
+        background-color: var(--moov-orange);
+        color: var(--white);
+        box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        background-color: var(--moov-orange-hover);
+        transform: translateY(-1px);
+      }
+
+      .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      /* Alertes */
+      .alert {
+        display: none;
+        margin-top: 1.5rem;
+        padding: 1rem;
+        border-radius: 8px;
+        font-size: 0.95rem;
+      }
+
+      .alert.success {
+        background-color: #dcfce7;
+        color: var(--success);
+        border: 1px solid #86efac;
+      }
+
+      .alert.error {
+        background-color: #fee2e2;
+        color: var(--error);
+        border: 1px solid #fca5a5;
+      }
+
+      footer {
+        text-align: center;
+        padding: 1.2rem;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+      }
+
+      @media (max-width: 640px) {
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <div class="brand-badge">PORTAIL PARTENAIRES</div>
+        <h1>Gestion des Contenus VOD</h1>
+      </div>
+      <div class="api-status">API v1 • Connecté</div>
+    </header>
+
+    <main>
+      <div class="card">
+        <div class="card-header">
+          <h2>Charger un nouveau contenu</h2>
+          <p>
+            Téléversez vos fichiers vidéos et renseignez les métadonnées
+            associées.
+          </p>
+        </div>
+
+        <form id="uploadForm">
+          <!-- Zone Token d'authentification (Bearer JWT) -->
+          <div class="auth-box">
+            <div class="form-group">
+              <label for="authToken"
+                >Jeton d'accès Partenaire (Bearer Token)
+                <span class="optional">(si requis par votre API)</span></label
+              >
+              <input
+                type="password"
+                id="authToken"
+                placeholder="Collez votre token JWT ici..."
+              />
+            </div>
+          </div>
+
+          <!-- Zone de dépôt de fichier -->
+          <div class="drop-zone" id="dropZone">
+            <div class="drop-zone-icon">🎬</div>
+            <p>Cliquez pour sélectionner une vidéo ou glissez-la ici</p>
+            <span
+              >Formats supportés : MP4, MKV, MOV (Taille max selon
+              serveur)</span
+            >
+            <input
+              type="file"
+              id="fileInput"
+              name="file"
+              accept="video/*"
+              hidden
+              required
+            />
+            <div class="file-info" id="fileInfo"></div>
+          </div>
+
+          <!-- Champs Form-Data identiques à votre requête Postman -->
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="name"
+                >Nom du contenu (name) <span class="required">*</span></label
+              >
+              <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="Ex: totorino 228"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="partnerId"
+                >ID Partenaire (partnerId)
+                <span class="required">*</span></label
+              >
+              <input
+                type="text"
+                id="partnerId"
+                name="partnerId"
+                value="780858fa-f32e-479c-a082-6ff3959db910"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="category_id"
+                >ID Catégorie (category_id)
+                <span class="required">*</span></label
+              >
+              <input
+                type="text"
+                id="category_id"
+                name="category_id"
+                value="7d6c5ced-e819-44ff-8fc6-91c685c60cb8"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="type_id"
+                >ID Type (type_id) <span class="required">*</span></label
+              >
+              <input
+                type="text"
+                id="type_id"
+                name="type_id"
+                value="80a9b0d5-ec80-4b61-89cb-211f9c898227"
+                required
+              />
+            </div>
+
+            <div class="form-group full-width">
+              <label for="mulr"
+                >URL Média externe (mulr)
+                <span class="optional">(optionnel)</span></label
+              >
+              <input
+                type="text"
+                id="mulr"
+                name="mulr"
+                placeholder="https://..."
+              />
+            </div>
+
+            <div class="form-group full-width">
+              <label for="synopsis"
+                >Synopsis <span class="optional">(optionnel)</span></label
+              >
+              <textarea
+                id="synopsis"
+                name="synopsis"
+                placeholder="Description ou résumé du contenu..."
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Barre de progression -->
+          <div class="progress-container" id="progressContainer">
+            <div class="progress-header">
+              <span id="progressStatus">Envoi en cours...</span>
+              <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="progressBarFill"></div>
+            </div>
+          </div>
+
+          <!-- Messages de retour -->
+          <div class="alert" id="alertBox"></div>
+
+          <!-- Boutons -->
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" id="resetBtn">
+              Réinitialiser
+            </button>
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+              Publier le contenu
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <footer>
+      Plateforme de Diffusion Partenaires • Charte Orange, Bleu & Blanc
+    </footer>
+
+    <script>
+      const API_URL = "http://localhost:3000/api/v1/contents/upload";
+
+      const dropZone = document.getElementById("dropZone");
+      const fileInput = document.getElementById("fileInput");
+      const fileInfo = document.getElementById("fileInfo");
+      const uploadForm = document.getElementById("uploadForm");
+      const submitBtn = document.getElementById("submitBtn");
+      const resetBtn = document.getElementById("resetBtn");
+      const progressContainer = document.getElementById("progressContainer");
+      const progressBarFill = document.getElementById("progressBarFill");
+      const progressPercent = document.getElementById("progressPercent");
+      const progressStatus = document.getElementById("progressStatus");
+      const alertBox = document.getElementById("alertBox");
+
+      // Gestion du clic sur la zone de dépôt
+      dropZone.addEventListener("click", () => fileInput.click());
+
+      // Gestion du Drag & Drop
+      dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.classList.add("dragover");
+      });
+
+      dropZone.addEventListener("dragleave", () => {
+        dropZone.classList.remove("dragover");
+      });
+
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("dragover");
+        if (e.dataTransfer.files.length > 0) {
+          fileInput.files = e.dataTransfer.files;
+          updateFileInfo(e.dataTransfer.files[0]);
+        }
+      });
+
+      fileInput.addEventListener("change", () => {
+        if (fileInput.files.length > 0) {
+          updateFileInfo(fileInput.files[0]);
+        }
+      });
+
+      function updateFileInfo(file) {
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        fileInfo.style.display = "block";
+        fileInfo.innerHTML = `<strong>Fichier sélectionné :</strong> ${file.name} (${sizeMB} Mo)`;
+      }
+
+      function showAlert(type, message) {
+        alertBox.className = `alert ${type}`;
+        alertBox.textContent = message;
+        alertBox.style.display = "block";
+      }
+
+      resetBtn.addEventListener("click", () => {
+        uploadForm.reset();
+        fileInfo.style.display = "none";
+        progressContainer.style.display = "none";
+        alertBox.style.display = "none";
+      });
+
+      // Soumission du formulaire avec suivi de progression via XMLHttpRequest
+      uploadForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        alertBox.style.display = "none";
+
+        if (!fileInput.files.length) {
+          showAlert(
+            "error",
+            "Veuillez sélectionner un fichier vidéo avant de continuer.",
+          );
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+        formData.append(
+          "partnerId",
+          document.getElementById("partnerId").value.trim(),
+        );
+        formData.append("name", document.getElementById("name").value.trim());
+        formData.append(
+          "category_id",
+          document.getElementById("category_id").value.trim(),
+        );
+        formData.append(
+          "type_id",
+          document.getElementById("type_id").value.trim(),
+        );
+
+        const mulr = document.getElementById("mulr").value.trim();
+        const synopsis = document.getElementById("synopsis").value.trim();
+        if (mulr) formData.append("mulr", mulr);
+        if (synopsis) formData.append("synopsis", synopsis);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", API_URL, true);
+
+        // Ajout du header Authorization si un token est saisi
+        const token = document.getElementById("authToken").value.trim();
+        if (token) {
+          xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+        }
+
+        // Mise à jour de la barre de progression
+        progressContainer.style.display = "block";
+        progressBarFill.style.width = "0%";
+        progressPercent.textContent = "0%";
+        progressStatus.textContent = "Téléversement en cours...";
+        submitBtn.disabled = true;
+
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percent = Math.round((event.loaded / event.total) * 100);
+            progressBarFill.style.width = `${percent}%`;
+            progressPercent.textContent = `${percent}%`;
+            if (percent === 100) {
+              progressStatus.textContent = "Traitement par le serveur...";
+            }
+          }
+        };
+
+        xhr.onload = () => {
+          submitBtn.disabled = false;
+          if (xhr.status >= 200 && xhr.status < 300) {
+            progressStatus.textContent = "Terminé !";
+            showAlert(
+              "success",
+              "Le contenu a été téléversé et enregistré avec succès !",
+            );
+          } else {
+            let errorMsg = `Erreur serveur (${xhr.status})`;
+            try {
+              const resp = JSON.parse(xhr.responseText);
+              if (resp.message) errorMsg += ` : ${resp.message}`;
+            } catch (_) {}
+            showAlert("error", errorMsg);
+          }
+        };
+
+        xhr.onerror = () => {
+          submitBtn.disabled = false;
+          showAlert(
+            "error",
+            "Impossible de joindre le serveur (vérifiez que localhost:3000 est lancé et que CORS est activé).",
+          );
+        };
+
+        xhr.send(formData);
+      });
+    </script>
+  </body>
+</html>
